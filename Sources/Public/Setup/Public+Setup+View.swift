@@ -46,7 +46,7 @@ public extension View {
         #else
         let popupStack = PopupStack.registerStack(id: id)
         return self
-            .accessibilityElement(children: popupStack.popups.isEmpty ? .combine : .ignore)
+            .accessibilityHidden(!popupStack.popups.isEmpty)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .overlay(PopupView(rootView: self, popupStack: .registerStack(id: id)), alignment: .top)
             .onAppear { _ = configBuilder(.init()) }
