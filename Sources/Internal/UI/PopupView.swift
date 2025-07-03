@@ -62,7 +62,7 @@ private extension PopupView {
             createTopPopupStackView()
             createCenterPopupStackView()
             createBottomPopupStackView()
-        }.accessibilityAddTraits(.isModal)
+        }
     }
 }
 

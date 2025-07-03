@@ -30,18 +30,34 @@ private extension PopupCenterStackView {
 
 private extension PopupCenterStackView {
     func createPopup(_ popup: AnyPopup) -> some View {
-        popup.body
-            .accessibilityAddTraits(.isModal)
-            .compositingGroup()
-            .accessibilityAddTraits(.isModal)
-            .fixedSize(horizontal: false, vertical: viewModel.activePopupProperties.verticalFixedSize)
-            .onHeightChange { await viewModel.updatePopupHeight($0, popup) }
-            .frame(height: viewModel.activePopupProperties.height)
-            .frame(maxWidth: .infinity, maxHeight: viewModel.activePopupProperties.height)
-            .background(backgroundColor: getBackgroundColor(for: popup), overlayColor: .clear, corners: viewModel.activePopupProperties.corners)
-            .opacity(viewModel.calculateOpacity(for: popup))
-            .focusSection_tvOS()
-            .padding(viewModel.activePopupProperties.outerPadding)
+        if #available(iOS 16.4, *) {
+            return popup.body
+                .accessibilityAddTraits(.isModal)
+                .compositingGroup()
+                .accessibilityAddTraits(.isModal)
+                .presentationBackgroundInteraction(.disabled)
+                .fixedSize(horizontal: false, vertical: viewModel.activePopupProperties.verticalFixedSize)
+                .onHeightChange { await viewModel.updatePopupHeight($0, popup) }
+                .frame(height: viewModel.activePopupProperties.height)
+                .frame(maxWidth: .infinity, maxHeight: viewModel.activePopupProperties.height)
+                .background(backgroundColor: getBackgroundColor(for: popup), overlayColor: .clear, corners: viewModel.activePopupProperties.corners)
+                .opacity(viewModel.calculateOpacity(for: popup))
+                .focusSection_tvOS()
+                .padding(viewModel.activePopupProperties.outerPadding)
+        } else {
+            return popup.body
+                .accessibilityAddTraits(.isModal)
+                .compositingGroup()
+                .accessibilityAddTraits(.isModal)
+                .fixedSize(horizontal: false, vertical: viewModel.activePopupProperties.verticalFixedSize)
+                .onHeightChange { await viewModel.updatePopupHeight($0, popup) }
+                .frame(height: viewModel.activePopupProperties.height)
+                .frame(maxWidth: .infinity, maxHeight: viewModel.activePopupProperties.height)
+                .background(backgroundColor: getBackgroundColor(for: popup), overlayColor: .clear, corners: viewModel.activePopupProperties.corners)
+                .opacity(viewModel.calculateOpacity(for: popup))
+                .focusSection_tvOS()
+                .padding(viewModel.activePopupProperties.outerPadding)
+        }
     }
 }
 
