@@ -8,7 +8,6 @@
 //
 //  Copyright ©2023 Mijick. All rights reserved.
 
-
 import SwiftUI
 
 struct PopupView: View {
@@ -21,7 +20,6 @@ struct PopupView: View {
     private let centerStackViewModel: VM.CenterStack = .init(CenterPopupConfig.self)
     private let bottomStackViewModel: VM.VerticalStack = .init(BottomPopupConfig.self)
 
-
     init(rootView: any View, popupStack: PopupStack) {
         #if os(tvOS)
         self.rootView = rootView
@@ -30,6 +28,7 @@ struct PopupView: View {
 
         Task { [self] in await updateViewModels { await $0.updatePopups(stack.popups) } }
     }
+
     var body: some View {
         #if os(tvOS)
         AnyView(rootView)
@@ -40,6 +39,7 @@ struct PopupView: View {
         #endif
     }
 }
+
 private extension PopupView {
     func createBody() -> some View {
         GeometryReader { reader in
@@ -54,6 +54,7 @@ private extension PopupView {
         .onKeyboardStateChange(perform: onKeyboardStateChange)
     }
 }
+
 private extension PopupView {
     func createPopupStackView() -> some View {
         ZStack {
@@ -61,9 +62,10 @@ private extension PopupView {
             createTopPopupStackView()
             createCenterPopupStackView()
             createBottomPopupStackView()
-        }
+        }.accessibilityAddTraits(.isModal)
     }
 }
+
 private extension PopupView {
     func createOverlayView() -> some View {
         getOverlayColor()
@@ -71,16 +73,20 @@ private extension PopupView {
             .animation(.linear, value: stack.popups)
             .onTapGesture(perform: onTap)
     }
+
     func createTopPopupStackView() -> some View {
-        PopupVerticalStackView(viewModel: topStackViewModel).zIndex(stack.priority.top)
+        PopupVerticalStackView(viewModel: topStackViewModel).zIndex(stack.priority.top).accessibilityAddTraits(.isModal)
     }
+
     func createCenterPopupStackView() -> some View {
-        PopupCenterStackView(viewModel: centerStackViewModel).zIndex(stack.priority.center)
+        PopupCenterStackView(viewModel: centerStackViewModel).zIndex(stack.priority.center).accessibilityAddTraits(.isModal)
     }
+
     func createBottomPopupStackView() -> some View {
-        PopupVerticalStackView(viewModel: bottomStackViewModel).zIndex(stack.priority.bottom)
+        PopupVerticalStackView(viewModel: bottomStackViewModel).zIndex(stack.priority.bottom).accessibilityAddTraits(.isModal)
     }
 }
+
 private extension PopupView {
     func getOverlayColor() -> Color { stack.popups.last?.config.overlayColor ?? .clear }
 }
@@ -99,11 +105,12 @@ private extension PopupView {
         newStack
             .difference(from: oldStack)
             .forEach { switch $0 {
-                case .remove(_, let element, _): element.onDismiss()
-                default: return
+            case .remove(_, let element, _): element.onDismiss()
+            default: return
             }}
         newStack.last?.onFocus()
     }
+
     func onKeyboardStateChange(_ isKeyboardActive: Bool) { Task {
         await updateViewModels { await $0.updateScreen(isKeyboardActive: isKeyboardActive) }
     }}
@@ -111,17 +118,23 @@ private extension PopupView {
         stack.modify(.removeLastPopup)
     }}
 }
+
 private extension PopupView {
     nonisolated func updatePopup(_ popup: AnyPopup) async {
         await stack.update(popup: popup)
     }
+
     nonisolated func closePopup(_ popup: AnyPopup) async {
         await stack.modify(.removePopup(popup))
     }
+
     func updateViewModels(_ updateBuilder: @MainActor @escaping (any ViewModel) async -> ()) async {
-        for viewModel in [topStackViewModel, centerStackViewModel, bottomStackViewModel] { await updateBuilder(viewModel as! any ViewModel) }
+        for viewModel in [topStackViewModel, centerStackViewModel, bottomStackViewModel] {
+            await updateBuilder(viewModel as! any ViewModel)
+        }
     }
 }
+
 private extension PopupView {
     var tapOutsideClosesPopup: Bool { stack.popups.last?.config.isTapOutsideToDismissEnabled ?? false }
 }
