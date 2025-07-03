@@ -8,7 +8,6 @@
 //
 //  Copyright ©2024 Mijick. All rights reserved.
 
-
 import SwiftUI
 
 #if os(iOS)
@@ -58,6 +57,7 @@ open class PopupSceneDelegate: NSObject, UIWindowSceneDelegate {
 }
 
 // MARK: Create Popup Scene
+
 extension PopupSceneDelegate {
     open func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) { if let windowScene = scene as? UIWindowScene {
         let hostingController = UIHostingController(rootView: Color.clear
@@ -72,17 +72,16 @@ extension PopupSceneDelegate {
     }}
 }
 
-
 // MARK: - WINDOW
 
-
-
 // MARK: Implementation
+
 fileprivate class Window: UIWindow {
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
         if #available(iOS 18, *) { point_iOS18(inside: point, with: event) }
         else { point_iOS17(inside: point, with: event) }
     }
+
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         if #available(iOS 18, *) { hitTest_iOS18(point, with: event) }
         else { hitTest_iOS17(point, with: event) }
@@ -90,6 +89,7 @@ fileprivate class Window: UIWindow {
 }
 
 // MARK: Point
+
 private extension Window {
     @available(iOS 18, *)
     func point_iOS18(inside point: CGPoint, with event: UIEvent?) -> Bool {
@@ -98,25 +98,28 @@ private extension Window {
         let hit = hitTestHelper(point, with: event, view: subviews.count > 1 ? self : view)
         return hit != nil
     }
+
     func point_iOS17(inside point: CGPoint, with event: UIEvent?) -> Bool {
         super.point(inside: point, with: event)
     }
 }
 
 // MARK: Hit Test
+
 private extension Window {
     @available(iOS 18, *)
     func hitTest_iOS18(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         super.hitTest(point, with: event)
     }
+
     func hitTest_iOS17(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         guard let hit = super.hitTest(point, with: event) else { return nil }
         return rootViewController?.view == hit ? nil : hit
     }
 }
 
-
 // MARK: Hit Test Helper
+
 // Based on philip_trauner solution: https://forums.developer.apple.com/forums/thread/762292?answerId=803885022#803885022
 @available(iOS 18, *)
 private extension Window {
@@ -129,20 +132,23 @@ private extension Window {
         }
     }
 }
+
 @available(iOS 18, *)
 private extension Window {
     func shouldCheckSubview(_ subview: UIView, convertedPoint: CGPoint, event: UIEvent?) -> Bool {
         subview.isUserInteractionEnabled &&
-        subview.isHidden == false &&
-        subview.alpha > 0 &&
-        subview.point(inside: convertedPoint, with: event)
+            subview.isHidden == false &&
+            subview.alpha > 0 &&
+            subview.point(inside: convertedPoint, with: event)
     }
+
     func calculateHitTestSubviewResult(_ point: CGPoint, with event: UIEvent?, subview: UIView, depth: Int) -> HitTestResult {
         switch hitTestHelper(point, with: event, view: subview, depth: depth + 1) {
             case .some(let result): result
             case nil: (subview, depth)
         }
     }
+
     func getDeepestHitTestResult(candidate: HitTestResult, current: HitTestResult?) -> HitTestResult {
         switch current {
             case .some(let current) where current.depth > candidate.depth: current
@@ -150,6 +156,7 @@ private extension Window {
         }
     }
 }
+
 @available(iOS 18, *)
 private extension Window {
     typealias HitTestResult = (view: UIView, depth: Int)
