@@ -8,29 +8,32 @@
 //
 //  Copyright ©2023 Mijick. All rights reserved.
 
-
 import SwiftUI
 
 struct PopupCenterStackView: View {
     @ObservedObject var viewModel: VM.CenterStack
 
-    
     var body: some View { if viewModel.screen.height > 0 {
         ZStack(content: createPopupStack)
             .id(viewModel.popups.isEmpty)
             .transition(transition)
             .frame(maxWidth: .infinity, maxHeight: viewModel.screen.height)
+            .accessibilityAddTraits(.isModal)
     }}
 }
+
 private extension PopupCenterStackView {
     func createPopupStack() -> some View {
         ForEach(viewModel.popups, id: \.self, content: createPopup)
     }
 }
+
 private extension PopupCenterStackView {
     func createPopup(_ popup: AnyPopup) -> some View {
         popup.body
+            .accessibilityAddTraits(.isModal)
             .compositingGroup()
+            .accessibilityAddTraits(.isModal)
             .fixedSize(horizontal: false, vertical: viewModel.activePopupProperties.verticalFixedSize)
             .onHeightChange { await viewModel.updatePopupHeight($0, popup) }
             .frame(height: viewModel.activePopupProperties.height)
@@ -45,6 +48,7 @@ private extension PopupCenterStackView {
 private extension PopupCenterStackView {
     func getBackgroundColor(for popup: AnyPopup) -> Color { popup.config.backgroundColor }
 }
+
 private extension PopupCenterStackView {
     var transition: AnyTransition { .scale(scale: 1.1).combined(with: .opacity) }
 }
